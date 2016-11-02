@@ -19,13 +19,13 @@ export debian_target_version="squeeze" # The version of debian that you want to 
 export nameserver_addr="8.8.8.8"  
 
 # we will clone kernel repositories from this url
-export repos_root_url="git://github.com/embeddedprojects"
+export repos_root_url="git://github.com/zmint"
 
 # where to get the standard kernel #kernel_pkg_path="${HOME}/gnublin/built_kernels"
 export std_kernel_pkg_path="$debian_installed_files_path"                                    
 
 # where to get the qemu kernel
-export qemu_kernel_pkg_path="http://www.hs-augsburg.de/~ingmar_k/gnublin/kernels/2.6.33"  
+export qemu_kernel_pkg_path="http://elk.informatik.fh-augsburg.de/pub/Gnublin/"  
 
 # qemu kernel file name
 export qemu_kernel_pkg_name="kernel_2.6.33-gnublin-qemu-1.2_1335647673.tar.bz2"
