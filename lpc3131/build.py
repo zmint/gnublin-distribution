@@ -59,20 +59,20 @@ def toolchain():
     os.lchown(toolchain_path + 'armv5te', user_id, user_id)
     subprocess.call(['umount', toolchain_path + 'mnt_eldk-iso'])
 
-    #Create source path script
-
   myprint("Toolchain DONE!")
 
 
 def setsh():
-  #todo: older eldk / eldk v5.2.1 | i686-oesdk-linux / i686-eldk-linux
-  #above dependencies should apply here  /----------------/
-  p1 = toolchain_path + "armv5te/sysroots/i686-oesdk-linux/usr/bin/armv5te-linux-gnueabi/"
-  p2 = toolchain_path + "armv5te/sysroots/i686-oesdk-linux/bin/armv5te-linux-gnueabi/"
+  if(eldk_version == '5.0'):
+    p1 = toolchain_path + "armv5te/sysroots/i686-oesdk-linux/usr/bin/armv5te-linux-gnueabi/"
+#    p2 = ""
+  elif any(eldk_version in s for s in supported_eldk_versions):
+    p1 = toolchain_path + "armv5te/sysroots/i686-eldk-linux/usr/bin/armv5te-linux-gnueabi/"
+#    p2 = toolchain_path + "armv5te/sysroots/i686-eldk-linux/bin/armv5te-linux-gnueabi/"
+
   os.environ["ARCH"] = "arm"
   os.environ["CROSS_COMPILE"] = "arm-linux-gnueabi-"
-  oldpath = os.environ["PATH"]
-  os.environ["PATH"] = p1 + ":" + p2 + ":" + oldpath
+  os.environ["PATH"] = p1 + ":" + os.environ["PATH"]
 
 
 def bootloader_apex():
@@ -112,18 +112,17 @@ def kernel():
     subprocess.call(['make', 'clean'])
     myprint("Updating Kernel Repo: " + repos_root_url + '/' + git_name_kernel)
     subprocess.call(['git', 'pull'])
-    #rmtree(kernel_path + kernel_name)
   else:
     os.chdir(kernel_path)
     myprint("Getting Kernel Repo: " + repos_root_url + '/' + git_name_kernel)
     subprocess.call(['git', 'clone', repos_root_url + '/' + git_name_kernel])
 
   os.chdir(working_dir)
-  #configure kernel
+
   myprint("Configure Kernel with " + kernel_config)
   subprocess.call(['make', kernel_config])
+  myprint("`make " + kernel_config + "` DONE")
 
-  #
   myprint("Building zImage")
   subprocess.call(['make', '-j', parallel_jobs, 'zImage'])
   myprint("`make zImage` DONE")
@@ -132,13 +131,32 @@ def kernel():
   subprocess.call(['make', '-j', parallel_jobs, 'modules'])
   myprint("`make modules` DONE")
 
+  # wipe old modules
+  rmtree(output_path + 'kernel/lib/modules')
+  mkdir_n_owner(output_path + 'kernel/lib/modules', user_id, user_id)
+
   myprint("Installing kernel modules (make modules_install)")
   subprocess.call(['make', '-j', parallel_jobs, 'modules_install', 'INSTALL_MOD_PATH=' + output_path + 'kernel'])
   myprint("`make modules_install` DONE")
 
   # copy to output
   copy2(working_dir + 'arch/arm/boot/zImage', output_path + 'kernel')
-#  copy2(working_dir + 'lib/modules/*', output_path + 'kernel/lib/modules')
+
+  # compress kernel
+  myprint("Compressing Kernel to " + output_path + std_kernel_pkg_name)
+  tar = tarfile.open(output_path + std_kernel_pkg_name, 'w:gz')
+  os.chdir(working_dir)
+  tar.add('.config', arcname='kernel_' + kernel_version + '-gnublin-std.config')
+  os.chdir(output_path + 'kernel/')
+  tar.add('lib')
+  tar.add('zImage')
+  tar.close()
+  myprint("Compressing Kernel DONE")
+
+  os.chdir(output_path)
+  kernelmd5 = open(std_kernel_pkg_name + '.md5', 'w')
+  kernelmd5.write(md5(std_kernel_pkg_name) + '\n')
+  kernelmd5.close()
   
   return 0
 
