@@ -2,6 +2,9 @@
 
 import time
 import hashlib
+import subprocess
+import os, errno
+from shutil import rmtree
 
 def myprint(message):
   print("###  " + message)
@@ -28,6 +31,31 @@ def mkdir_n_owner(path, uid, gid):
   if(not os.path.isdir(path)):
     os.mkdir(path)
     os.chown(path, uid, gid)
+
+def silent_remove(path):
+  if(os.path.islink(path) or os.path.isfile(path)):
+    try:
+      os.remove(path)
+    except OSError as e:
+      if e.errno != errno.ENOENT:
+        raise
+
+  if(os.path.isdir(path)):
+    try:
+      rmtree(path)
+    except OSError as e:
+      if e.errno != errno.ENOENT:
+        raise
+
+
+
+def install_packages(packages):
+  for package in packages:
+    try:
+      subprocess.check_call(['apt-get', 'install', '-y', package])
+    except subprocess.CalledProcessError as e:
+      myprint("Couldn't install Package. " + package + " not found.")
+
 
 # based on
 # http://stackoverflow.com/questions/3431825/generating-an-md5-checksum-of-a-file
