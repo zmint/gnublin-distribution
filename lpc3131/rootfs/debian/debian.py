@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import subprocess
+import tarfile
 from shutil import copy2
 
 def create_img():
@@ -22,10 +23,7 @@ def debootstrap_stage2():
 
   subprocess.call([rootfs_path + 'chroot_1.sh', debootstrap_path, debian_target_version, nameserver_addr])
 
-
   myprint("Entering CHROOT_2 Environment now")
-  #todo: if min | max
-  add_packages = add_packages_base
   subprocess.call(['mount', '-t', 'devpts', 'devpts', debootstrap_path + 'dev/pts'])
   subprocess.call(['mount', '-t', 'proc', 'proc', debootstrap_path + 'proc'])
   subprocess.call([rootfs_path + 'chroot_2.sh', debootstrap_path, add_packages, filesystem_type])
@@ -41,7 +39,40 @@ def debootstrap_stage2():
 def disable_mnt_tmpfs():
   myprint("Disable_mnt_tmpfs unimplemented")
 
+def do_post_debootstrap_config():
+  myprint("Starting post-debootstrap configuration")
 
+  os.environ['use_ramzswap']=use_ramzswap
+  os.environ['ramzswap_kernel_module_name']=ramzswap_kernel_module_name
+  os.environ['ramzswap_size_kb']=ramzswap_size_kb
+  os.environ['vm_swappiness']=ramzswap_vm_swappiness
+  os.environ['i2c_hwclock']=i2c_hwclock
+  os.environ['i2c_hwclock_name']=i2c_hwclock_name
+  os.environ['i2c_hwclock_addr']=i2c_hwclock_addr
+  os.environ['rtc_kernel_module_name']=rtc_kernel_module_name
+  os.environ['additional_packages']=add_packages
+
+  subprocess.call('./post_debootstrap_config.sh', debootstrap_path, 'post_debootstrap_errors.log')
+
+  subprocess.call(['umount', debootstrap_path])
+
+  tar = tarfile.open(output_path + std_kernel_pkg_name)
+  tar.extractall(rootfs_path + 'tmp')
+  tar.close()
+  
+  download(qemu_kernel_pkg_path + qemu_kernel_pkg_name, downloads_path + qemu_kernel_pkg_name)
+  tar = tarfile.open(downloads_path + qemu_kernel_pkg_name)
+  tar.extractall(rootfs_path + 'qemu-kernel')
+  tar.close()
+
+  myprint("Starting configuration in qemu environment now!")
+#  proc = subprocess.Popen(['qemu-system-arm', '-M', 'versatilepb', '-cpu', 'arm926', '-no-reboot', 'kernel', rootfs_path + 'qemu-kernel/zImage', '-hda', image_fpath, '-m', '256', '-append', 'root=/dev/sda rootfstype=' + filesystem_type + ' mem=256M devtmpfs.mount=0 rw ip=dhcp'], stderr=subprocess.PIPE)
+#  err = proc.communicate()
+#qemu_log = open('qemu_error.log', 'w')
+#qemu_log.write(err)
+#qemu_log.close()
+
+  
 
 def rootfs_debian():
   os.chdir(rootfs_path)
@@ -58,6 +89,10 @@ def rootfs_debian():
 
 #  disable_mnt_tmpfs()
 
+  mkdir_n_owner(rootfs_path + 'tmp')
+  do_post_debootstrap_config()
 
   subprocess.call(['umount', debootstrap_path])
+
+
   return 0

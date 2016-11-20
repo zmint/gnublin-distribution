@@ -47,6 +47,16 @@ def silent_remove(path):
       if e.errno != errno.ENOENT:
         raise
 
+def download(url, filename)"
+  myprint("Downloading " + url)
+  if(os.path.isfile(filename)):
+    myprint(filename + " already downloaded")
+  else:
+    try:
+      urllib.urlretrieve(url, filename)
+    except:
+      myprint("Error while Downloading " + url + " to " + filename)
+    myprint("Successfully downloaded file to " + filename)
 
 
 def install_packages(packages):

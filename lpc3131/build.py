@@ -22,6 +22,8 @@ def initialize():
   mkdir_n_owner(output_path + 'kernel/lib', user_id, user_id)
   mkdir_n_owner(output_path + 'kernel/lib/modules', user_id, user_id)
   mkdir_n_owner(rootfs_path + 'mnt_debootstrap', user_id, user_id)
+  if(not os.path.isdir(gnublin_tools_path)):
+    os.mkdir(gnublin_tools_path)
 
   subprocess.call(['apt-get', 'update'])
   install_packages(required_pkgs_build)
@@ -70,13 +72,13 @@ if __name__ == '__main__':
   runas = os.environ['USER']
   if(runas != 'root'):
     print("has to run as root!")
-    raise SystemExit(0)
+    raise SystemExit(99)
 
   if('gnublin-distribution/lpc3131' not in os.getcwd()):
     print("Please don't run the script from another location!")
     print("`cd` into the directory of the script to run it properly")
     print_usage()
-    raise SystemExit(0)
+    raise SystemExit(99)
 
   execfile('util.py')
   execfile('config.py')
@@ -161,3 +163,13 @@ if __name__ == '__main__':
   else:
     execfile(rootfs_path + 'debian.py')
     rootfs_debian()
+
+  myprint("\n\
+#############################################\n\
+# 5th Stage: Rootfs completion              #\n\
+#############################################")
+  if(checkstamp('rootfs_completion')):
+    myprint("Rootfs completion already done at " + stamptime('rootfs_completion'))
+  else:
+    execfile(rootfs_path + 'rootfs_completion.py')
+    rootfs_debian_completion()
