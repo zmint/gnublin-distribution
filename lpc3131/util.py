@@ -69,15 +69,14 @@ def install_packages(packages):
       myprint("Couldn't install Package. " + package + " not found.")
 
 
+def sha256_check(fname):
+  err = subprocess.call(['sha256sum', '-c', '--ignore-missing', fname])
+  if(err):
+    err = subprocess.call(['sha256sum', '-c', fname])
+  return err
+
 # based on
 # http://stackoverflow.com/questions/3431825/generating-an-md5-checksum-of-a-file
-def sha256(fname):
-  hash_sha256 = hashlib.sha256()
-  with open(fname, "rb") as f:
-    for chunk in iter(lambda: f.read(4096), b""):
-      hash_sha256.update(chunk)
-  return hash_sha256.hexdigest() + '  ' + fname
-
 def md5(fname):
   hash_md5 = hashlib.md5()
   with open(fname, "rb") as f:
