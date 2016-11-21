@@ -16,14 +16,11 @@ Options:\n\
 
 def initialize():
   mkdir_n_owner(downloads_path, user_id, user_id)
-  mkdir_n_owner(output_path, user_id, user_id)
   mkdir_n_owner(toolchain_path + 'mnt_eldk-iso', user_id, user_id)
+  mkdir_n_owner(output_path, user_id, user_id)
   mkdir_n_owner(output_path + 'kernel', user_id, user_id)
   mkdir_n_owner(output_path + 'kernel/lib', user_id, user_id)
   mkdir_n_owner(output_path + 'kernel/lib/modules', user_id, user_id)
-  mkdir_n_owner(rootfs_path + 'mnt_debootstrap', user_id, user_id)
-  if(not os.path.isdir(gnublin_tools_path)):
-    os.mkdir(gnublin_tools_path)
 
   subprocess.call(['apt-get', 'update'])
   install_packages(required_pkgs_build)
@@ -163,13 +160,5 @@ if __name__ == '__main__':
   else:
     execfile(rootfs_path + 'debian.py')
     rootfs_debian()
+    #makestamp('rootfs')
 
-  myprint("\n\
-#############################################\n\
-# 5th Stage: Rootfs completion              #\n\
-#############################################")
-  if(checkstamp('rootfs_completion')):
-    myprint("Rootfs completion already done at " + stamptime('rootfs_completion'))
-  else:
-    execfile(rootfs_path + 'rootfs_completion.py')
-    rootfs_debian_completion()

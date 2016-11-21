@@ -16,9 +16,10 @@ def bootloader_apex():
     myprint('apex-1.6.8.tar.gz' + " extracted")
 
   #configure
-  #todo: change .config file in apexfolder
-  #if(ram == 32)
-  #  apex_ram = "CONFIG_RAM_SIZE_32MB=y"
+  #todo: automatic change of .config file in apexfolder
+  if(not ram == 32):
+    myprint("Please set apex .config file correctly")
+    myprint("Set 'CONFIG_RAM_SIZE_" + ram + "MB=y' and remove 'CONFIG_RAM_SIZE_32MB=y'")
 
   #make
   subprocess.call(['make', '-j', '8', '-C', bootloader_path + 'apex-1.6.8', 'apex.bin'])

@@ -24,10 +24,10 @@ echo '### chroot_2.sh
 export LANG=C 2>>$logfile
 apt-get -y install apt-utils dialog locales manpages man-db 2>>$logfile
 
-#cat <<END > /etc/apt/apt.conf 2>>$logfile
-#APT::Install-Recommends \"0\";
-#APT::Install-Suggests \"0\";
-#END
+cat <<END > /etc/apt/apt.conf 2>>$logfile
+APT::Install-Recommends \"0\";
+APT::Install-Suggests \"0\";
+END
 
 apt-get -y -d install $additional_packages 2>>$logfile
 

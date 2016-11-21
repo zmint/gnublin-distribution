@@ -33,9 +33,16 @@ def toolchain():
       myprint("sha256 Checksum of " + eldk_iso_fname + " is correct")
 
     # Mount and Install
-    err = subprocess.call(['mount', downloads_path + eldk_iso_fname, toolchain_path + 'mnt_eldk-iso', '-o', 'loop'])
+    err = subprocess.call(['mount', '-o', 'loop', downloads_path + eldk_iso_fname, toolchain_path + 'mnt_eldk-iso'])
 
-    subprocess.call([toolchain_path + 'mnt_eldk-iso/install.sh', '-s', '-i', 'qte', 'armv5te'])
+    if(eldk_version == '5.0'):
+      subprocess.call([toolchain_path + 'mnt_eldk-iso/install.sh', '-s', '-i', 'qte', 'armv5te'])
+    elif any(eldk_version in s for s in supported_eldk_versions):
+      subprocess.call([toolchain_path + 'mnt_eldk-iso/install.sh', '-s', 'qte', 'armv5te'])
+    else:
+      myprint("Unknown eldk version. Refusing to make further progress")
+      raise SystemExit(99)
+
     os.symlink(eldk_path + 'armv5te', toolchain_path + 'armv5te')
     os.lchown(toolchain_path + 'armv5te', user_id, user_id)
     subprocess.call(['umount', toolchain_path + 'mnt_eldk-iso'])

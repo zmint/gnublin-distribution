@@ -47,7 +47,7 @@ def silent_remove(path):
       if e.errno != errno.ENOENT:
         raise
 
-def download(url, filename)"
+def download(url, filename):
   myprint("Downloading " + url)
   if(os.path.isfile(filename)):
     myprint(filename + " already downloaded")

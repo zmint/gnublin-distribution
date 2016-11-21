@@ -6,6 +6,8 @@ kernel/gnublin-lpc3131-3.3.0/
 rootfs/debian/chroot_*.log
 rootfs/debian/debian_rootfs_gnublin.img
 rootfs/debian/mnt_debootstrap
+
+rootfs/debian/debootstrap_stage2.log
 installpy.log
 
 gnublin_package/deb/

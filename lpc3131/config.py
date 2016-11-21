@@ -36,20 +36,18 @@ logfile		= root_path + 'installpy.log'
 
 required_pkgs_build	= ['make', 'g++', 'dpkg-dev', 'git', 'git-core', 'swig2.0', 'gawk']
 # 'libncurses5-dev' #make-menuconfig
+required_pkgs_rootfs = ['debootstrap', 'binfmt-support', 'qemu-user-static', 'qemu', 'qemu-kvm', 'qemu-system', 'parted']
 
 #############################################
 # 1st Stage: Toolchain                      #
 #############################################
-#If you want to use your own Version of ELDK, you can set your Path here
-custom_eldk_path	= ''
-
 eldk_version	= '5.0'
 eldk_path	= '/opt/eldk-' + eldk_version + '/'
 eldk_ftp	= 'ftp://ftp.denx.de/pub/eldk/' + eldk_version + '/iso/'
 eldk_hash_fname	= 'iso.sha256'
 
-supported_eldk_versions = ['5.1', '5.2', '5.2.1', '5.3', '5.4', '5.5', '5.5.2', '5.5.3', '5.6']
 
+supported_eldk_versions = ['5.1', '5.2.1', '5.5', '5.5.2', '5.5.3']
 if(eldk_version == '5.0'):
   eldk_iso_fname	= 'armv5te-qte-5.0.iso'
 elif any(eldk_version in s for s in supported_eldk_versions):
@@ -96,18 +94,11 @@ image_fname	= 'debian_rootfs_gnublin.img'
 image_fpath	= rootfs_path + image_fname
 image_size	= '2048'
 debootstrap_path= rootfs_path + 'mnt_debootstrap/'
-filesystem_type	= 'ext3' #default ext4
+filesystem_type	= 'ext3'
 
-#on host
-required_pkgs_rootfs = ['debootstrap', 'binfmt-support', 'qemu-user-static', 'qemu', 'qemu-kvm', 'qemu-system', 'parted']
-
-#on debootstrap
-add_packages_base="i2c-tools makedev module-init-tools dhcp3-client netbase ifupdown iproute iputils-ping wget net-tools vim nano hdparm bzip2 p7zip unrar unzip zip p7zip-full screen less usbutils psmisc strace info ethtool wireless-tools wpasupplicant python rsyslog whois time procps perl parted build-essential ccache bison flex autoconf automake gcc libc6 cpp curl ftp gettext subversion lua50"
+# Packages that are installed on gnublin rootfs
+add_packages_base="i2c-tools makedev module-init-tools isc-dhcp-client netbase ifupdown iproute iputils-ping wget net-tools vim nano hdparm bzip2 p7zip unrar unzip zip p7zip-full screen less usbutils psmisc strace info ethtool wireless-tools wpasupplicant python rsyslog whois time procps perl parted build-essential ccache bison flex autoconf automake gcc libc6 cpp curl ftp gettext subversion lua50"
 add_packages_max="php5 php5-cli php5-cgi gpsd gpsd-clients fswebcam uvccapture lm-sensors firmware-linux-free firmware-linux-nonfree firmware-realtek firmware-ralink firmware-linux firmware-brcm80211 firmware-atheros rcconf cgilib cgiemail cgi-mapserver lrzsz libnss-mdns libpam-modules nscd ssh libpcsclite1 libnl1 nfs-common tree lighttpd vsftpd rsync ruby git fakeroot libjpeg62-dev picocom tmux"
-
-
-
-#todo: if min | max
 if(debian_distr_version == 'min'):
   add_packages = add_packages_base
 elif(debian_distr_version == 'max'):
