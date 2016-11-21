@@ -4,6 +4,7 @@ import time
 import hashlib
 import subprocess
 import os, errno
+import urllib
 from shutil import rmtree
 
 def myprint(message):
@@ -49,13 +50,14 @@ def silent_remove(path):
 
 def download(url, filename):
   myprint("Downloading " + url)
-  if(os.path.isfile(filename)):
+  if(os.path.exists(filename)):
     myprint(filename + " already downloaded")
   else:
     try:
       urllib.urlretrieve(url, filename)
     except:
       myprint("Error while Downloading " + url + " to " + filename)
+      return 99
     myprint("Successfully downloaded file to " + filename)
 
 

@@ -3,6 +3,7 @@
 import os
 import tarfile
 import subprocess
+from shutil import copy2
 
 
 def kernel():
